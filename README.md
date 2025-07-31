@@ -30,18 +30,35 @@ A modern web application for managing 3D printing workflows, built with Next.js,
 
 ## 🚀 Getting Started
 
+### Prerequisites
+- Node.js 18+ 
+- Firebase project (for database and file storage)
+
+### Setup
+
+1. **Clone and install dependencies**
 ```bash
-# Install dependencies
 npm install
+```
 
-# Run development server
+2. **Firebase Configuration**
+   - Create a Firebase project at [console.firebase.google.com](https://console.firebase.google.com)
+   - Enable Firestore Database and Storage
+   - Copy your Firebase config from Project Settings
+   - Create `.env.local` file with your Firebase credentials:
+   ```bash
+   cp env.example .env.local
+   # Edit .env.local with your Firebase config
+   ```
+
+3. **Run development server**
+```bash
 npm run dev
+```
 
-# Build for production
+4. **Build for production**
+```bash
 npm run build
-
-# Start production server
-npm start
 ```
 
 Open [http://localhost:3000](http://localhost:3000) to view the application.
@@ -49,11 +66,15 @@ Open [http://localhost:3000](http://localhost:3000) to view the application.
 ## 📋 Development Roadmap
 
 - [x] Basic Next.js setup with TypeScript
+- [x] Firebase & Firestore integration
+- [x] Database schema and types
+- [x] File storage service
+- [ ] 3D model upload component
+- [ ] Model gallery display
 - [ ] 3D model viewer component
 - [ ] Print queue interface
 - [ ] Real-time status updates
 - [ ] User authentication
-- [ ] API integration
 - [ ] Performance optimization
 - [ ] Comprehensive testing
 
