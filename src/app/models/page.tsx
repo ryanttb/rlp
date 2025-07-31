@@ -1,4 +1,5 @@
 import { FC } from 'react';
+import Link from 'next/link';
 
 const ModelsPage: FC = () => {
   return (
@@ -16,18 +17,18 @@ const ModelsPage: FC = () => {
               </h1>
             </div>
             <nav className="hidden md:flex space-x-8">
-              <a href="/" className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+              <Link href="/" className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
                 Dashboard
-              </a>
-              <a href="/models" className="text-blue-600 dark:text-blue-400 font-semibold">
+              </Link>
+              <Link href="/models" className="text-blue-600 dark:text-blue-400 font-semibold">
                 3D Models
-              </a>
-              <a href="/queue" className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+              </Link>
+              <Link href="/queue" className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
                 Print Queue
-              </a>
-              <a href="/workflows" className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+              </Link>
+              <Link href="/workflows" className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
                 Workflows
-              </a>
+              </Link>
             </nav>
           </div>
         </div>
@@ -54,7 +55,7 @@ const ModelsPage: FC = () => {
               Gallery Coming Soon
             </h3>
             <p className="text-gray-600 dark:text-gray-300 max-w-md mx-auto mb-8">
-              This is where you'll be able to browse, upload, and interact with 3D models. 
+              This is where you&apos;ll be able to browse, upload, and interact with 3D models. 
               Features will include real-time visualization, geometry analysis, and print preparation tools.
             </p>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-2xl mx-auto">

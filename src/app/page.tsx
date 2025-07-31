@@ -1,4 +1,5 @@
 import { FC } from 'react';
+import Link from 'next/link';
 import FeatureCard from '@/components/FeatureCard';
 import TechBadge from '@/components/TechBadge';
 
@@ -18,18 +19,18 @@ const Home: FC = () => {
               </h1>
             </div>
             <nav className="hidden md:flex space-x-8">
-              <a href="#dashboard" className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+              <Link href="/" className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
                 Dashboard
-              </a>
-              <a href="/models" className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+              </Link>
+              <Link href="/models" className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
                 3D Models
-              </a>
-              <a href="#queue" className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+              </Link>
+              <Link href="/queue" className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
                 Print Queue
-              </a>
-              <a href="#workflows" className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+              </Link>
+              <Link href="/workflows" className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
                 Workflows
-              </a>
+              </Link>
             </nav>
           </div>
         </div>
@@ -59,14 +60,14 @@ const Home: FC = () => {
 
         {/* Feature Grid */}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
-          <a href="/models" className="block">
+          <Link href="/models" className="block">
             <FeatureCard
               title="3D Model Gallery"
               description="Interactive visualization and management of 3D models with real-time geometry analysis."
               icon="🎨"
               color="from-purple-500 to-pink-500"
             />
-          </a>
+          </Link>
           <FeatureCard
             title="Print Queue Management"
             description="Real-time monitoring and control of print jobs with live status updates."
