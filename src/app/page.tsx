@@ -1,4 +1,6 @@
 import { FC } from 'react';
+import FeatureCard from '@/components/FeatureCard';
+import TechBadge from '@/components/TechBadge';
 
 const Home: FC = () => {
   return (
@@ -124,32 +126,5 @@ const Home: FC = () => {
     </div>
   );
 };
-
-// Feature Card Component
-const FeatureCard: FC<{
-  title: string;
-  description: string;
-  icon: string;
-  color: string;
-}> = ({ title, description, icon, color }) => (
-  <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow duration-200">
-    <div className={`w-12 h-12 rounded-lg bg-gradient-to-r ${color} flex items-center justify-center text-2xl mb-4`}>
-      {icon}
-    </div>
-    <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-      {title}
-    </h3>
-    <p className="text-gray-600 dark:text-gray-300">
-      {description}
-    </p>
-  </div>
-);
-
-// Tech Badge Component
-const TechBadge: FC<{ name: string; color: string }> = ({ name, color }) => (
-  <div className={`${color} px-4 py-2 rounded-lg text-center font-medium text-sm`}>
-    {name}
-  </div>
-);
 
 export default Home;
