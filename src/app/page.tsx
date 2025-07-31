@@ -21,7 +21,7 @@ const Home: FC = () => {
               <a href="#dashboard" className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
                 Dashboard
               </a>
-              <a href="#models" className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+              <a href="/models" className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
                 3D Models
               </a>
               <a href="#queue" className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
@@ -59,12 +59,14 @@ const Home: FC = () => {
 
         {/* Feature Grid */}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
-          <FeatureCard
-            title="3D Model Gallery"
-            description="Interactive visualization and management of 3D models with real-time geometry analysis."
-            icon="🎨"
-            color="from-purple-500 to-pink-500"
-          />
+          <a href="/models" className="block">
+            <FeatureCard
+              title="3D Model Gallery"
+              description="Interactive visualization and management of 3D models with real-time geometry analysis."
+              icon="🎨"
+              color="from-purple-500 to-pink-500"
+            />
+          </a>
           <FeatureCard
             title="Print Queue Management"
             description="Real-time monitoring and control of print jobs with live status updates."
