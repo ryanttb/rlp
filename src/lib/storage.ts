@@ -3,7 +3,6 @@ import {
   uploadBytesResumable,
   getDownloadURL,
   deleteObject,
-  listAll,
 } from 'firebase/storage';
 import { storage } from './firebase';
 import { UploadProgress } from '@/types/models';

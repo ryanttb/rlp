@@ -9,9 +9,7 @@ import {
   query,
   where,
   orderBy,
-  limit,
   serverTimestamp,
-  Timestamp,
 } from 'firebase/firestore';
 import { db } from './firebase';
 import { Model, Category, ModelFilters } from '@/types/models';

@@ -1,11 +1,10 @@
 'use client';
 
-import { FC, useState, useEffect } from 'react';
+import { FC, useState } from 'react';
 import Link from 'next/link';
 import { db, storage } from '@/lib/firebase';
 import { modelService, categoryService } from '@/lib/firestore';
 import { storageService } from '@/lib/storage';
-import { defaultCategories } from '@/lib/defaultData';
 
 const TestFirebasePage: FC = () => {
   const [connectionStatus, setConnectionStatus] = useState<'testing' | 'success' | 'error'>('testing');
@@ -26,14 +25,14 @@ const TestFirebasePage: FC = () => {
       addTestResult('✅ Firebase initialized successfully');
       
       // Test 2: Firestore connection
-      const { collection, doc, getDoc } = await import('firebase/firestore');
+      const { doc, getDoc } = await import('firebase/firestore');
       const testDocRef = doc(db, 'test', 'connection-test');
       await getDoc(testDocRef);
       addTestResult('✅ Firestore connection successful');
       
       // Test 3: Storage connection
-      const { ref } = await import('firebase/storage');
-      const storageRef = ref(storage, 'test/connection-test.txt');
+      const { ref, getDownloadURL } = await import('firebase/storage');
+      await getDownloadURL(ref(storage, 'test/connection-test.txt'));
       addTestResult('✅ Storage connection successful');
       
       // Test 4: Test category creation
@@ -184,7 +183,7 @@ const TestFirebasePage: FC = () => {
             <div className="space-y-2 max-h-96 overflow-y-auto">
               {testResults.length === 0 ? (
                 <p className="text-gray-500 dark:text-gray-400">
-                  No tests run yet. Click "Run Firebase Tests" to start.
+                  No tests run yet. Click &quot;Run Firebase Tests&quot; to start.
                 </p>
               ) : (
                 testResults.map((result, index) => (
