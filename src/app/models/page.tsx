@@ -4,23 +4,37 @@ import { FC, useState } from 'react';
 import Link from 'next/link';
 import ModelGallery from '@/components/ModelGallery';
 import ModelViewer from '@/components/ModelViewer';
+import ModelEditModal from '@/components/ModelEditModal';
 import { Model } from '@/types/models';
 
 const ModelsPage: FC = () => {
   const [selectedModel, setSelectedModel] = useState<Model | null>(null);
+  const [editingModel, setEditingModel] = useState<Model | null>(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   const handleModelView = (model: Model) => {
     setSelectedModel(model);
   };
 
   const handleModelEdit = (model: Model) => {
-    // TODO: Implement model edit modal/form
-    console.log('Edit model:', model);
-    alert(`Editing model: ${model.name}`);
+    setEditingModel(model);
+    setIsEditModalOpen(true);
   };
 
   const handleCloseViewer = () => {
     setSelectedModel(null);
+  };
+
+  const handleCloseEditModal = () => {
+    setIsEditModalOpen(false);
+    setEditingModel(null);
+  };
+
+  const handleModelSave = (updatedModel: Model) => {
+    // Trigger a refresh of the ModelGallery to show updated data
+    setRefreshTrigger(prev => prev + 1);
+    console.log('Model updated:', updatedModel);
   };
 
   return (
@@ -63,6 +77,7 @@ const ModelsPage: FC = () => {
         <ModelGallery
           onModelView={handleModelView}
           onModelEdit={handleModelEdit}
+          refreshTrigger={refreshTrigger}
         />
       </main>
 
@@ -73,6 +88,14 @@ const ModelsPage: FC = () => {
           onClose={handleCloseViewer}
         />
       )}
+
+      {/* Model Edit Modal */}
+      <ModelEditModal
+        model={editingModel}
+        isOpen={isEditModalOpen}
+        onClose={handleCloseEditModal}
+        onSave={handleModelSave}
+      />
     </div>
   );
 };

@@ -10,9 +10,10 @@ import ModelUpload from './ModelUpload';
 interface ModelGalleryProps {
   onModelView?: (model: Model) => void;
   onModelEdit?: (model: Model) => void;
+  refreshTrigger?: number;
 }
 
-const ModelGallery: FC<ModelGalleryProps> = ({ onModelView, onModelEdit }) => {
+const ModelGallery: FC<ModelGalleryProps> = ({ onModelView, onModelEdit, refreshTrigger }) => {
   const [models, setModels] = useState<Model[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
@@ -47,7 +48,7 @@ const ModelGallery: FC<ModelGalleryProps> = ({ onModelView, onModelEdit }) => {
     };
 
     loadData();
-  }, []);
+  }, [refreshTrigger]);
 
   // Filter and sort models
   const filteredAndSortedModels = useMemo(() => {
