@@ -124,7 +124,7 @@ const ModelUpload: FC<ModelUploadProps> = ({ onUploadComplete, onUploadError }) 
       onUploadError?.('Upload failed');
       setIsUploading(false);
     }
-  }, [onUploadComplete, onUploadError, maxFileSize]);
+  }, [onUploadComplete, onUploadError, maxFileSize, allowedFileTypes]);
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault();

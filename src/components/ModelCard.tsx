@@ -13,7 +13,7 @@ interface ModelCardProps {
   onView?: (model: Model) => void;
 }
 
-const ModelCard: FC<ModelCardProps> = ({ model, onDelete, onEdit, onView }) => {
+const ModelCard: FC<ModelCardProps> = ({ model, onDelete, onView }) => {
   const [isDeleting, setIsDeleting] = useState(false);
   const [showActions, setShowActions] = useState(false);
 

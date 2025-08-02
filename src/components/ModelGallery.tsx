@@ -346,7 +346,6 @@ const ModelGallery: FC<ModelGalleryProps> = ({ onModelView, onModelEdit, refresh
               key={model.id}
               model={model}
               onDelete={handleModelDelete}
-              onEdit={onModelEdit}
               onView={onModelView}
             />
           ))}
