@@ -1,0 +1,268 @@
+'use client';
+
+import { FC, useState, useEffect } from 'react';
+import Link from 'next/link';
+import { Printer, PrintJob, Model } from '@/types/models';
+import PrinterCard from '@/components/PrinterCard';
+import PrintJobCard from '@/components/PrintJobCard';
+import AddPrinterModal from '@/components/AddPrinterModal';
+
+const QueuePage: FC = () => {
+  const [printers, setPrinters] = useState<Printer[]>([]);
+  const [printJobs, setPrintJobs] = useState<PrintJob[]>([]);
+  const [models, setModels] = useState<Model[]>([]);
+  const [isAddPrinterModalOpen, setIsAddPrinterModalOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState<'printers' | 'jobs'>('printers');
+  const [loading, setLoading] = useState(true);
+
+  // Mock data for demonstration
+  useEffect(() => {
+    const mockPrinters: Printer[] = [
+      {
+        id: '1',
+        name: 'Levity Pro X1',
+        type: 'Levity',
+        status: 'printing',
+        location: 'Production Lab A',
+        description: 'High-speed liquid printing system with advanced material handling',
+        capabilities: {
+          maxBuildVolume: { width: 300, height: 300, depth: 400 },
+          supportedMaterials: ['PLA', 'ABS', 'PETG', 'TPU'],
+          layerHeightRange: { min: 0.1, max: 0.3 }
+        },
+        createdAt: new Date('2024-01-15'),
+        updatedAt: new Date()
+      },
+      {
+        id: '2',
+        name: 'Service Printer Alpha',
+        type: 'Print as a Service',
+        status: 'online',
+        location: 'Service Center B',
+        description: 'Cloud-connected service printer for remote operations',
+        capabilities: {
+          maxBuildVolume: { width: 250, height: 250, depth: 300 },
+          supportedMaterials: ['PLA', 'ABS', 'Resin'],
+          layerHeightRange: { min: 0.05, max: 0.2 }
+        },
+        createdAt: new Date('2024-02-01'),
+        updatedAt: new Date()
+      },
+      {
+        id: '3',
+        name: 'Levity Mini',
+        type: 'Levity',
+        status: 'maintenance',
+        location: 'R&D Lab',
+        description: 'Compact liquid printing system for prototyping',
+        capabilities: {
+          maxBuildVolume: { width: 150, height: 150, depth: 200 },
+          supportedMaterials: ['PLA', 'Resin'],
+          layerHeightRange: { min: 0.1, max: 0.25 }
+        },
+        createdAt: new Date('2024-01-20'),
+        updatedAt: new Date()
+      }
+    ];
+
+    const mockPrintJobs: PrintJob[] = [
+      {
+        id: '1',
+        modelId: 'model-1',
+        printerId: '1',
+        status: 'printing',
+        priority: 'high',
+        estimatedDuration: 180,
+        actualDuration: 45,
+        progress: 25,
+        startedAt: new Date(Date.now() - 45 * 60 * 1000),
+        createdAt: new Date(Date.now() - 60 * 60 * 1000),
+        updatedAt: new Date(),
+        userId: 'user-1',
+        printSettings: {
+          layerHeight: 0.2,
+          infill: 20,
+          support: true,
+          material: 'PLA',
+          temperature: 200,
+          bedTemperature: 60
+        },
+        notes: 'High priority prototype for client demo'
+      },
+      {
+        id: '2',
+        modelId: 'model-2',
+        printerId: '2',
+        status: 'queued',
+        priority: 'normal',
+        estimatedDuration: 120,
+        createdAt: new Date(Date.now() - 30 * 60 * 1000),
+        updatedAt: new Date(),
+        userId: 'user-2',
+        printSettings: {
+          layerHeight: 0.15,
+          infill: 15,
+          support: false,
+          material: 'ABS',
+          temperature: 230,
+          bedTemperature: 100
+        }
+      }
+    ];
+
+    setPrinters(mockPrinters);
+    setPrintJobs(mockPrintJobs);
+    setLoading(false);
+  }, []);
+
+  const handleAddPrinter = (printer: Omit<Printer, 'id' | 'createdAt' | 'updatedAt'>) => {
+    const newPrinter: Printer = {
+      ...printer,
+      id: Date.now().toString(),
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+    setPrinters([...printers, newPrinter]);
+    setIsAddPrinterModalOpen(false);
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'online': return 'text-green-600 bg-green-100';
+      case 'printing': return 'text-blue-600 bg-blue-100';
+      case 'maintenance': return 'text-yellow-600 bg-yellow-100';
+      case 'offline': return 'text-red-600 bg-red-100';
+      default: return 'text-gray-600 bg-gray-100';
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      {/* Header */}
+      <header className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center py-6">
+            <div className="flex items-center space-x-3">
+              <Link href="/" className="flex items-center space-x-3">
+                <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center">
+                  <span className="text-white font-bold text-sm">RLP</span>
+                </div>
+                <span className="text-gray-500 dark:text-gray-400">/</span>
+              </Link>
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+                Print Queue
+              </h1>
+            </div>
+            <button
+              onClick={() => setIsAddPrinterModalOpen(true)}
+              className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              Add Printer
+            </button>
+          </div>
+        </div>
+      </header>
+
+      {/* Tab Navigation */}
+      <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <nav className="flex space-x-8">
+            <button
+              onClick={() => setActiveTab('printers')}
+              className={`py-4 px-1 border-b-2 font-medium text-sm ${
+                activeTab === 'printers'
+                  ? 'border-blue-500 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              Printers ({printers.length})
+            </button>
+            <button
+              onClick={() => setActiveTab('jobs')}
+              className={`py-4 px-1 border-b-2 font-medium text-sm ${
+                activeTab === 'jobs'
+                  ? 'border-blue-500 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              Print Jobs ({printJobs.length})
+            </button>
+          </nav>
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {activeTab === 'printers' ? (
+          <div>
+            <div className="mb-6">
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+                Available Printers
+              </h2>
+              <p className="text-gray-600 dark:text-gray-400">
+                Monitor and manage your 3D printing systems
+              </p>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {printers.map((printer) => (
+                <PrinterCard
+                  key={printer.id}
+                  printer={printer}
+                  onStatusChange={(status) => {
+                    setPrinters(printers.map(p => 
+                      p.id === printer.id ? { ...p, status, updatedAt: new Date() } : p
+                    ));
+                  }}
+                />
+              ))}
+            </div>
+          </div>
+        ) : (
+          <div>
+            <div className="mb-6">
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+                Print Jobs
+              </h2>
+              <p className="text-gray-600 dark:text-gray-400">
+                Track the status and progress of your print jobs
+              </p>
+            </div>
+            
+            <div className="space-y-4">
+              {printJobs.map((job) => (
+                <PrintJobCard
+                  key={job.id}
+                  job={job}
+                  printer={printers.find(p => p.id === job.printerId)}
+                  onStatusChange={(status) => {
+                    setPrintJobs(printJobs.map(j => 
+                      j.id === job.id ? { ...j, status, updatedAt: new Date() } : j
+                    ));
+                  }}
+                />
+              ))}
+            </div>
+          </div>
+        )}
+      </main>
+
+      {/* Add Printer Modal */}
+      <AddPrinterModal
+        isOpen={isAddPrinterModalOpen}
+        onClose={() => setIsAddPrinterModalOpen(false)}
+        onAdd={handleAddPrinter}
+      />
+    </div>
+  );
+};
+
+export default QueuePage; 
