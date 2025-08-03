@@ -1,7 +1,6 @@
 'use client';
 
 import { FC, useState } from 'react';
-import Link from 'next/link';
 import ModelGallery from '@/components/ModelGallery';
 import ModelViewer from '@/components/ModelViewer';
 import ModelEditModal from '@/components/ModelEditModal';

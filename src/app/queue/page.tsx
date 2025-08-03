@@ -1,7 +1,6 @@
 'use client';
 
 import { FC, useState, useEffect, useMemo } from 'react';
-import Link from 'next/link';
 import { Printer, PrintJob, Model } from '@/types/models';
 import { printerService, printJobService, modelService } from '@/lib/firestore';
 import PrinterCard from '@/components/PrinterCard';

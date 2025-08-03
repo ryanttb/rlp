@@ -3,6 +3,7 @@
 import { FC, useState } from 'react';
 import { Model } from '@/types/models';
 import ThreeJSViewer from './ThreeJSViewer';
+import AddToPrintQueueModal from './AddToPrintQueueModal';
 
 interface ModelViewerProps {
   model: Model;
@@ -11,6 +12,7 @@ interface ModelViewerProps {
 
 const ModelViewer: FC<ModelViewerProps> = ({ model, onClose }) => {
   const [viewMode, setViewMode] = useState<'3d' | 'info' | 'settings'>('3d');
+  const [showPrintQueueModal, setShowPrintQueueModal] = useState(false);
 
   const formatFileSize = (bytes: number): string => {
     if (bytes === 0) return '0 Bytes';
@@ -243,7 +245,10 @@ const ModelViewer: FC<ModelViewerProps> = ({ model, onClose }) => {
                     Quick Actions
                   </h3>
                   <div className="space-y-3">
-                    <button className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg text-sm font-medium transition-colors">
+                    <button 
+                      onClick={() => setShowPrintQueueModal(true)}
+                      className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg text-sm font-medium transition-colors"
+                    >
                       Add to Print Queue
                     </button>
                     <button className="w-full border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 py-2 px-4 rounded-lg text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
@@ -262,6 +267,18 @@ const ModelViewer: FC<ModelViewerProps> = ({ model, onClose }) => {
           )}
         </div>
       </div>
+      
+      {/* Print Queue Modal */}
+      {showPrintQueueModal && (
+        <AddToPrintQueueModal
+          model={model}
+          onClose={() => setShowPrintQueueModal(false)}
+          onSuccess={() => {
+            // Could add a success notification here
+            console.log('Model added to print queue successfully');
+          }}
+        />
+      )}
     </div>
   );
 };
