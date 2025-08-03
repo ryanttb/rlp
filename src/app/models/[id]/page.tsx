@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { Model } from '@/types/models';
 import { modelService } from '@/lib/firestore';
 import ModelViewer from '@/components/ModelViewer';
+import Header from '@/components/Header';
 
 const ModelDetailPage: FC = () => {
   const params = useParams();
@@ -96,63 +97,27 @@ const ModelDetailPage: FC = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
-      {/* Header */}
-      <header className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm border-b border-gray-200 dark:border-gray-700">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-6">
-            <div className="flex items-center space-x-3">
-              <Link href="/" className="w-10 h-10 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-xl">RLP</span>
-              </Link>
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-                  {model.name}
-                </h1>
-                <p className="text-gray-600 dark:text-gray-300">
-                  {model.fileType.toUpperCase()} • {formatFileSize(model.fileSize)}
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center space-x-4">
-              <button
-                onClick={() => setIsViewerOpen(true)}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
-              >
-                View Model
-              </button>
-              <Link
-                href={`/models/${model.id}/edit`}
-                className="border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 px-4 py-2 rounded-lg font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-              >
-                Edit
-              </Link>
-            </div>
-          </div>
-        </div>
-      </header>
-
-      {/* Navigation */}
-      <nav className="bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm border-b border-gray-200 dark:border-gray-700">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex space-x-8 py-4">
-            <Link href="/" className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
-              Dashboard
+            <Header 
+        title={model.name}
+        subtitle={`${model.fileType.toUpperCase()} • ${formatFileSize(model.fileSize)}`}
+        showActions={true}
+        actions={
+          <>
+            <button
+              onClick={() => setIsViewerOpen(true)}
+              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+            >
+              View Model
+            </button>
+            <Link
+              href={`/models/${model.id}/edit`}
+              className="border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 px-4 py-2 rounded-lg font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+            >
+              Edit
             </Link>
-            <Link href="/models" className="text-blue-600 dark:text-blue-400 font-semibold">
-              3D Models
-            </Link>
-            <Link href="/queue" className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
-              Print Queue
-            </Link>
-            <Link href="/workflows" className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
-              Workflows
-            </Link>
-            <Link href="/admin" className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
-              Admin
-            </Link>
-          </div>
-        </div>
-      </nav>
+          </>
+        }
+      />
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">

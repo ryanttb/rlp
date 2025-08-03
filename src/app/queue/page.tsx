@@ -7,6 +7,7 @@ import { printerService, printJobService, modelService } from '@/lib/firestore';
 import PrinterCard from '@/components/PrinterCard';
 import PrintJobCard from '@/components/PrintJobCard';
 import AddPrinterModal from '@/components/AddPrinterModal';
+import Header from '@/components/Header';
 
 const QueuePage: FC = () => {
   const [printers, setPrinters] = useState<Printer[]>([]);
@@ -237,30 +238,7 @@ const QueuePage: FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      {/* Header */}
-      <header className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-6">
-            <div className="flex items-center space-x-3">
-              <Link href="/" className="flex items-center space-x-3">
-                <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center">
-                  <span className="text-white font-bold text-sm">RLP</span>
-                </div>
-                <span className="text-gray-500 dark:text-gray-400">/</span>
-              </Link>
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-                Print Queue
-              </h1>
-            </div>
-            <button
-              onClick={() => setIsAddPrinterModalOpen(true)}
-              className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
-            >
-              Add Printer
-            </button>
-          </div>
-        </div>
-      </header>
+      <Header title="Print Queue" />
 
       {/* Error Banner */}
       {error && (
@@ -301,28 +279,36 @@ const QueuePage: FC = () => {
       {/* Tab Navigation */}
       <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <nav className="flex space-x-8">
+          <div className="flex justify-between items-center">
+            <nav className="flex space-x-8">
+              <button
+                onClick={() => setActiveTab('printers')}
+                className={`py-4 px-1 border-b-2 font-medium text-sm ${
+                  activeTab === 'printers'
+                    ? 'border-blue-500 text-blue-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+              >
+                Printers ({printers.length})
+              </button>
+              <button
+                onClick={() => setActiveTab('jobs')}
+                className={`py-4 px-1 border-b-2 font-medium text-sm ${
+                  activeTab === 'jobs'
+                    ? 'border-blue-500 text-blue-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+              >
+                Print Jobs ({printJobs.length})
+              </button>
+            </nav>
             <button
-              onClick={() => setActiveTab('printers')}
-              className={`py-4 px-1 border-b-2 font-medium text-sm ${
-                activeTab === 'printers'
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              }`}
+              onClick={() => setIsAddPrinterModalOpen(true)}
+              className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
             >
-              Printers ({printers.length})
+              Add Printer
             </button>
-            <button
-              onClick={() => setActiveTab('jobs')}
-              className={`py-4 px-1 border-b-2 font-medium text-sm ${
-                activeTab === 'jobs'
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              }`}
-            >
-              Print Jobs ({printJobs.length})
-            </button>
-          </nav>
+          </div>
         </div>
       </div>
 
