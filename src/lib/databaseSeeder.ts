@@ -9,7 +9,7 @@ const sampleModels: Omit<Model, 'id' | 'createdAt' | 'updatedAt'>[] = [
     description: 'A complex gear assembly with multiple interlocking gears for mechanical applications',
     category: 'Mechanical Parts',
     tags: ['gears', 'mechanical', 'assembly', 'engineering'],
-    fileUrl: 'https://example.com/models/gear-assembly.stl',
+    fileUrl: 'https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/models/stl/ascii/slotted_disk.stl',
     fileSize: 2048576, // 2MB
     fileType: 'stl',
     dimensions: { width: 50, height: 30, depth: 20 },
@@ -27,7 +27,7 @@ const sampleModels: Omit<Model, 'id' | 'createdAt' | 'updatedAt'>[] = [
     description: 'Beautiful decorative vase with intricate geometric patterns',
     category: 'Art & Sculptures',
     tags: ['art', 'decorative', 'vase', 'geometric'],
-    fileUrl: 'https://example.com/models/artistic-vase.obj',
+    fileUrl: 'https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/models/obj/male02/male02.obj',
     fileSize: 1048576, // 1MB
     fileType: 'obj',
     dimensions: { width: 15, height: 25, depth: 15 },
@@ -45,7 +45,7 @@ const sampleModels: Omit<Model, 'id' | 'createdAt' | 'updatedAt'>[] = [
     description: 'Ergonomic phone stand with cable management features',
     category: 'Household Items',
     tags: ['phone', 'stand', 'organizer', 'household'],
-    fileUrl: 'https://example.com/models/phone-stand.stl',
+    fileUrl: 'https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/models/stl/binary/pr2_head_pan.stl',
     fileSize: 512000, // 500KB
     fileType: 'stl',
     dimensions: { width: 8, height: 12, depth: 6 },

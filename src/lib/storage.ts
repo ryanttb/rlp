@@ -152,4 +152,52 @@ export const storageService = {
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   },
+
+  // Get a fresh download URL for a file (handles CORS issues)
+  async getFreshDownloadURL(filePath: string): Promise<string> {
+    try {
+      const fileRef = ref(storage, filePath);
+      const downloadURL = await getDownloadURL(fileRef);
+      return downloadURL;
+    } catch (error) {
+      console.error('Error getting download URL:', error);
+      throw error;
+    }
+  },
+
+  // Alternative method to get download URL with custom parameters
+  async getDownloadURLWithParams(filePath: string): Promise<string> {
+    try {
+      const fileRef = ref(storage, filePath);
+      // Force a new download URL with different parameters
+      const downloadURL = await getDownloadURL(fileRef);
+      // Add a timestamp to force cache refresh
+      const separator = downloadURL.includes('?') ? '&' : '?';
+      return `${downloadURL}${separator}t=${Date.now()}`;
+    } catch (error) {
+      console.error('Error getting download URL with params:', error);
+      throw error;
+    }
+  },
+
+  // Get file data as ArrayBuffer (bypasses CORS)
+  async getFileData(filePath: string): Promise<ArrayBuffer> {
+    try {
+      console.log('Getting file data via API for path:', filePath);
+      
+      // Use our Next.js API route (server-side, no CORS issues)
+      const response = await fetch(`/api/model-data?path=${encodeURIComponent(filePath)}`);
+      
+      if (!response.ok) {
+        throw new Error(`API request failed: ${response.status} ${response.statusText}`);
+      }
+      
+      const arrayBuffer = await response.arrayBuffer();
+      console.log('Successfully got file data via API, size:', arrayBuffer.byteLength);
+      return arrayBuffer;
+    } catch (error) {
+      console.error('Error getting file data:', error);
+      throw error;
+    }
+  },
 }; 

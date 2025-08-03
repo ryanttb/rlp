@@ -2,6 +2,7 @@
 
 import { FC, useState } from 'react';
 import { Model } from '@/types/models';
+import ThreeJSViewer from './ThreeJSViewer';
 
 interface ModelViewerProps {
   model: Model;
@@ -88,25 +89,20 @@ const ModelViewer: FC<ModelViewerProps> = ({ model, onClose }) => {
         <div className="flex-1 overflow-auto">
           {viewMode === '3d' && (
             <div className="p-6">
-              <div className="bg-gray-100 dark:bg-gray-700 rounded-lg h-96 flex items-center justify-center">
-                <div className="text-center">
-                  <div className="text-8xl mb-4">🎨</div>
-                  <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-                    3D Viewer Coming Soon
-                  </h3>
-                  <p className="text-gray-600 dark:text-gray-300 max-w-md">
-                    Interactive 3D visualization with rotation, zoom, and measurement tools will be implemented here.
-                    This will integrate with Three.js or similar 3D rendering libraries.
-                  </p>
-                  <div className="mt-6 flex justify-center space-x-4">
-                    <button className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm">
-                      Download Model
-                    </button>
-                    <button className="px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg text-sm">
-                      Share Model
-                    </button>
-                  </div>
-                </div>
+              <div className="bg-gray-100 dark:bg-gray-700 rounded-lg h-96">
+                <ThreeJSViewer
+                  fileUrl={model.fileUrl}
+                  fileType={model.fileType}
+                  dimensions={model.dimensions}
+                />
+              </div>
+              <div className="mt-4 flex justify-center space-x-4">
+                <button className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors">
+                  Download Model
+                </button>
+                <button className="px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                  Share Model
+                </button>
               </div>
             </div>
           )}

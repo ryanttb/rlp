@@ -17,11 +17,6 @@ const ModelsPage: FC = () => {
     setSelectedModel(model);
   };
 
-  const handleModelEdit = (model: Model) => {
-    setEditingModel(model);
-    setIsEditModalOpen(true);
-  };
-
   const handleCloseViewer = () => {
     setSelectedModel(null);
   };
@@ -76,7 +71,6 @@ const ModelsPage: FC = () => {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <ModelGallery
           onModelView={handleModelView}
-          onModelEdit={handleModelEdit}
           refreshTrigger={refreshTrigger}
         />
       </main>
