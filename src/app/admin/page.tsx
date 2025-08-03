@@ -8,7 +8,9 @@ const AdminPage: FC = () => {
   const [dbStatus, setDbStatus] = useState<{
     categories: number;
     models: number;
-    hasData: boolean;
+    printers: number;
+    printJobs: number;
+    total: number;
   } | null>(null);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
@@ -114,7 +116,7 @@ const AdminPage: FC = () => {
           </h3>
           
           {dbStatus ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4">
                 <div className="flex items-center justify-between">
                   <span className="text-blue-700 dark:text-blue-300 font-medium">Categories</span>
@@ -128,6 +130,22 @@ const AdminPage: FC = () => {
                   <span className="text-green-700 dark:text-green-300 font-medium">Models</span>
                   <span className="text-2xl font-bold text-green-600 dark:text-green-400">
                     {dbStatus.models}
+                  </span>
+                </div>
+              </div>
+              <div className="bg-purple-50 dark:bg-purple-900/20 rounded-lg p-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-purple-700 dark:text-purple-300 font-medium">Printers</span>
+                  <span className="text-2xl font-bold text-purple-600 dark:text-purple-400">
+                    {dbStatus.printers}
+                  </span>
+                </div>
+              </div>
+              <div className="bg-orange-50 dark:bg-orange-900/20 rounded-lg p-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-orange-700 dark:text-orange-300 font-medium">Print Jobs</span>
+                  <span className="text-2xl font-bold text-orange-600 dark:text-orange-400">
+                    {dbStatus.printJobs}
                   </span>
                 </div>
               </div>

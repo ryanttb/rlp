@@ -1,15 +1,17 @@
 'use client';
 
 import { FC, useState } from 'react';
-import { PrintJob, Printer } from '@/types/models';
+import Link from 'next/link';
+import { PrintJob, Printer, Model } from '@/types/models';
 
 interface PrintJobCardProps {
   job: PrintJob;
   printer?: Printer;
+  model?: Model;
   onStatusChange: (status: PrintJob['status']) => void;
 }
 
-const PrintJobCard: FC<PrintJobCardProps> = ({ job, printer, onStatusChange }) => {
+const PrintJobCard: FC<PrintJobCardProps> = ({ job, printer, model, onStatusChange }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const getStatusColor = (status: PrintJob['status']) => {
@@ -61,6 +63,14 @@ const PrintJobCard: FC<PrintJobCardProps> = ({ job, printer, onStatusChange }) =
     return remaining > 0 ? remaining : 0;
   };
 
+  const formatFileSize = (bytes: number) => {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  };
+
   return (
     <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow">
       <div className="p-6">
@@ -79,6 +89,30 @@ const PrintJobCard: FC<PrintJobCardProps> = ({ job, printer, onStatusChange }) =
                 {job.priority}
               </span>
             </div>
+            
+            {/* Model Information */}
+            {model && (
+              <div className="mb-2">
+                <div className="flex items-center space-x-2">
+                  <span className="text-sm text-gray-500 dark:text-gray-400">Model:</span>
+                  <Link 
+                    href={`/models/${model.id}`}
+                    className="text-sm font-medium text-blue-600 dark:text-blue-400 hover:underline"
+                  >
+                    {model.name}
+                  </Link>
+                  <span className="text-sm text-gray-500 dark:text-gray-400">•</span>
+                  <span className="text-sm text-gray-600 dark:text-gray-400">{model.fileType.toUpperCase()}</span>
+                  <span className="text-sm text-gray-500 dark:text-gray-400">•</span>
+                  <span className="text-sm text-gray-600 dark:text-gray-400">{formatFileSize(model.fileSize)}</span>
+                </div>
+                {model.description && (
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                    {model.description}
+                  </p>
+                )}
+              </div>
+            )}
             
             {printer && (
               <p className="text-sm text-gray-600 dark:text-gray-400">
@@ -174,6 +208,47 @@ const PrintJobCard: FC<PrintJobCardProps> = ({ job, printer, onStatusChange }) =
           </div>
         )}
 
+        {/* Model Details */}
+        {model && (
+          <div className="mb-4 p-3 bg-gray-50 dark:bg-gray-700 rounded-md">
+            <h4 className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">
+              Model Details
+            </h4>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
+              <div>
+                <span className="text-gray-500 dark:text-gray-400">Dimensions:</span>
+                <p className="text-gray-900 dark:text-white">
+                  {model.dimensions.width} × {model.dimensions.height} × {model.dimensions.depth} mm
+                </p>
+              </div>
+              <div>
+                <span className="text-gray-500 dark:text-gray-400">Category:</span>
+                <p className="text-gray-900 dark:text-white">{model.category}</p>
+              </div>
+              <div>
+                <span className="text-gray-500 dark:text-gray-400">Tags:</span>
+                <div className="flex flex-wrap gap-1 mt-1">
+                  {model.tags.slice(0, 3).map((tag) => (
+                    <span
+                      key={tag}
+                      className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-gray-100 dark:bg-gray-600 text-gray-800 dark:text-gray-200"
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                  {model.tags.length > 3 && (
+                    <span className="text-xs text-gray-500">+{model.tags.length - 3}</span>
+                  )}
+                </div>
+              </div>
+              <div>
+                <span className="text-gray-500 dark:text-gray-400">Status:</span>
+                <p className="text-gray-900 dark:text-white capitalize">{model.status}</p>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Print Settings */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
           <div>
@@ -233,7 +308,7 @@ const PrintJobCard: FC<PrintJobCardProps> = ({ job, printer, onStatusChange }) =
               Remaining
             </h4>
             <p className="text-sm text-gray-900 dark:text-white">
-              {formatDuration(getTimeRemaining())}
+              {formatDuration(getTimeRemaining() || undefined)}
             </p>
           </div>
           <div>

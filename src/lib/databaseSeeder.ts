@@ -166,67 +166,6 @@ const samplePrinters: Omit<Printer, 'id' | 'createdAt' | 'updatedAt'>[] = [
   }
 ];
 
-// Sample print jobs for testing
-const samplePrintJobs: Omit<PrintJob, 'id' | 'createdAt' | 'updatedAt'>[] = [
-  {
-    modelId: 'model-1',
-    printerId: 'printer-1',
-    status: 'printing',
-    priority: 'high',
-    estimatedDuration: 180,
-    actualDuration: 45,
-    progress: 25,
-    startedAt: new Date(Date.now() - 45 * 60 * 1000),
-    userId: 'demo-user',
-    printSettings: {
-      layerHeight: 0.2,
-      infill: 20,
-      support: true,
-      material: 'PLA',
-      temperature: 200,
-      bedTemperature: 60
-    },
-    notes: 'High priority prototype for client demo'
-  },
-  {
-    modelId: 'model-2',
-    printerId: 'printer-2',
-    status: 'queued',
-    priority: 'normal',
-    estimatedDuration: 120,
-    userId: 'demo-user',
-    printSettings: {
-      layerHeight: 0.15,
-      infill: 15,
-      support: false,
-      material: 'ABS',
-      temperature: 230,
-      bedTemperature: 100
-    }
-  },
-  {
-    modelId: 'model-3',
-    printerId: 'printer-1',
-    status: 'completed',
-    priority: 'low',
-    estimatedDuration: 90,
-    actualDuration: 85,
-    progress: 100,
-    startedAt: new Date(Date.now() - 2 * 60 * 60 * 1000),
-    completedAt: new Date(Date.now() - 35 * 60 * 1000),
-    userId: 'demo-user',
-    printSettings: {
-      layerHeight: 0.2,
-      infill: 25,
-      support: false,
-      material: 'PLA',
-      temperature: 200,
-      bedTemperature: 60
-    },
-    notes: 'Phone stand for office use'
-  }
-];
-
 export const seedDatabase = async () => {
   try {
     console.log('🌱 Starting database seeding...');
@@ -244,10 +183,12 @@ export const seedDatabase = async () => {
 
     // Seed models
     console.log('🎨 Seeding models...');
+    const modelIds: string[] = [];
     for (const model of sampleModels) {
       try {
-        await modelService.createModel(model);
-        console.log(`✅ Created model: ${model.name}`);
+        const modelId = await modelService.createModel(model);
+        modelIds.push(modelId);
+        console.log(`✅ Created model: ${model.name} (ID: ${modelId})`);
       } catch (error) {
         console.log(`⚠️ Model ${model.name} might already exist`);
       }
@@ -260,31 +201,102 @@ export const seedDatabase = async () => {
       try {
         const printerId = await printerService.createPrinter(printer);
         printerIds.push(printerId);
-        console.log(`✅ Created printer: ${printer.name}`);
+        console.log(`✅ Created printer: ${printer.name} (ID: ${printerId})`);
       } catch (error) {
         console.log(`⚠️ Printer ${printer.name} might already exist`);
       }
     }
 
-    // Seed print jobs (with actual printer IDs)
+    // Seed print jobs (with actual model and printer IDs)
     console.log('📋 Seeding print jobs...');
-    for (let i = 0; i < samplePrintJobs.length; i++) {
-      const printJob = samplePrintJobs[i];
+    const samplePrintJobs: Omit<PrintJob, 'id' | 'createdAt' | 'updatedAt'>[] = [
+      {
+        modelId: modelIds[0] || 'model-1', // Gear Assembly
+        printerId: printerIds[0] || 'printer-1',
+        status: 'printing',
+        priority: 'high',
+        estimatedDuration: 180,
+        actualDuration: 45,
+        progress: 25,
+        startedAt: new Date(Date.now() - 45 * 60 * 1000),
+        userId: 'demo-user',
+        printSettings: {
+          layerHeight: 0.2,
+          infill: 20,
+          support: true,
+          material: 'PLA',
+          temperature: 200,
+          bedTemperature: 60
+        },
+        notes: 'High priority prototype for client demo'
+      },
+      {
+        modelId: modelIds[1] || 'model-2', // Artistic Vase
+        printerId: printerIds[1] || 'printer-2',
+        status: 'queued',
+        priority: 'normal',
+        estimatedDuration: 120,
+        userId: 'demo-user',
+        printSettings: {
+          layerHeight: 0.15,
+          infill: 15,
+          support: false,
+          material: 'ABS',
+          temperature: 230,
+          bedTemperature: 100
+        }
+      },
+      {
+        modelId: modelIds[2] || 'model-3', // Phone Stand
+        printerId: printerIds[0] || 'printer-1',
+        status: 'completed',
+        priority: 'low',
+        estimatedDuration: 90,
+        actualDuration: 85,
+        progress: 100,
+        startedAt: new Date(Date.now() - 2 * 60 * 60 * 1000),
+        completedAt: new Date(Date.now() - 35 * 60 * 1000),
+        userId: 'demo-user',
+        printSettings: {
+          layerHeight: 0.2,
+          infill: 25,
+          support: false,
+          material: 'PLA',
+          temperature: 200,
+          bedTemperature: 60
+        },
+        notes: 'Phone stand for office use'
+      },
+      {
+        modelId: modelIds[3] || 'model-4', // Custom Wrench
+        printerId: printerIds[3] || 'printer-4',
+        status: 'preparing',
+        priority: 'high',
+        estimatedDuration: 150,
+        userId: 'demo-user',
+        printSettings: {
+          layerHeight: 0.15,
+          infill: 50,
+          support: true,
+          material: 'ABS',
+          temperature: 230,
+          bedTemperature: 100
+        },
+        notes: 'Automotive tool for specialized applications'
+      }
+    ];
+
+    for (const printJob of samplePrintJobs) {
       try {
-        // Use actual printer IDs if available, otherwise use placeholder
-        const printerId = printerIds[i] || `printer-${i + 1}`;
-        const jobWithPrinterId = {
-          ...printJob,
-          printerId
-        };
-        await printJobService.createPrintJob(jobWithPrinterId);
-        console.log(`✅ Created print job: ${printJob.modelId}`);
+        await printJobService.createPrintJob(printJob);
+        console.log(`✅ Created print job for model: ${printJob.modelId}`);
       } catch (error) {
-        console.log(`⚠️ Print job ${printJob.modelId} might already exist`);
+        console.log(`⚠️ Print job for model ${printJob.modelId} might already exist`);
       }
     }
 
     console.log('🎉 Database seeding completed successfully!');
+    console.log(`📊 Summary: ${modelIds.length} models, ${printerIds.length} printers, ${samplePrintJobs.length} print jobs`);
     return true;
   } catch (error) {
     console.error('❌ Error seeding database:', error);

@@ -3,7 +3,7 @@
 import { FC, useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Printer, PrintJob, Model } from '@/types/models';
-import { printerService, printJobService } from '@/lib/firestore';
+import { printerService, printJobService, modelService } from '@/lib/firestore';
 import PrinterCard from '@/components/PrinterCard';
 import PrintJobCard from '@/components/PrintJobCard';
 import AddPrinterModal from '@/components/AddPrinterModal';
@@ -80,7 +80,7 @@ const QueuePage: FC = () => {
       startedAt: new Date(Date.now() - 45 * 60 * 1000),
       createdAt: new Date(Date.now() - 60 * 60 * 1000),
       updatedAt: new Date(),
-      userId: 'user-1',
+      userId: 'demo-user',
       printSettings: {
         layerHeight: 0.2,
         infill: 20,
@@ -100,7 +100,7 @@ const QueuePage: FC = () => {
       estimatedDuration: 120,
       createdAt: new Date(Date.now() - 30 * 60 * 1000),
       updatedAt: new Date(),
-      userId: 'user-2',
+      userId: 'demo-user',
       printSettings: {
         layerHeight: 0.15,
         infill: 15,
@@ -120,19 +120,22 @@ const QueuePage: FC = () => {
         setError(null);
         
         // Try to load from Firebase
-        const [firebasePrinters, firebasePrintJobs] = await Promise.all([
+        const [firebasePrinters, firebasePrintJobs, firebaseModels] = await Promise.all([
           printerService.getPrinters(),
-          printJobService.getPrintJobs()
+          printJobService.getPrintJobs(),
+          modelService.getModels()
         ]);
 
         // If Firebase has data, use it; otherwise use mock data
         if (firebasePrinters.length > 0 || firebasePrintJobs.length > 0) {
           setPrinters(firebasePrinters);
           setPrintJobs(firebasePrintJobs);
+          setModels(firebaseModels);
           setUseMockData(false);
         } else {
           setPrinters(mockPrinters);
           setPrintJobs(mockPrintJobs);
+          setModels([]); // No mock models needed for demo
           setUseMockData(true);
         }
       } catch (err) {
@@ -140,6 +143,7 @@ const QueuePage: FC = () => {
         setError('Failed to load data from Firebase. Using demo data.');
         setPrinters(mockPrinters);
         setPrintJobs(mockPrintJobs);
+        setModels([]);
         setUseMockData(true);
       } finally {
         setLoading(false);
@@ -216,6 +220,11 @@ const QueuePage: FC = () => {
       console.error('Error updating print job status:', err);
       setError('Failed to update print job status. Please try again.');
     }
+  };
+
+  // Helper function to find model by ID
+  const getModelById = (modelId: string): Model | undefined => {
+    return models.find(model => model.id === modelId);
   };
 
   if (loading) {
@@ -357,6 +366,7 @@ const QueuePage: FC = () => {
                   key={job.id}
                   job={job}
                   printer={printers.find(p => p.id === job.printerId)}
+                  model={getModelById(job.modelId)}
                   onStatusChange={(status) => handlePrintJobStatusChange(job.id, status)}
                 />
               ))}
