@@ -88,16 +88,6 @@ const Header: FC<HeaderProps> = ({
               >
                 Workflows
               </Link>
-              <Link 
-                href="/admin" 
-                className={`transition-colors ${
-                  isActiveLink('/admin') 
-                    ? 'text-blue-600 dark:text-blue-400 font-semibold' 
-                    : 'text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400'
-                }`}
-              >
-                Admin
-              </Link>
             </nav>
             
             {showActions && actions && (
