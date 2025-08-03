@@ -177,7 +177,7 @@ export const seedDatabase = async () => {
         await categoryService.createCategory(category);
         console.log(`✅ Created category: ${category.name}`);
       } catch (error) {
-        console.log(`⚠️ Category ${category.name} might already exist`);
+        console.log(`⚠️ Category ${category.name} might already exist ${error}`);
       }
     }
 
@@ -190,7 +190,7 @@ export const seedDatabase = async () => {
         modelIds.push(modelId);
         console.log(`✅ Created model: ${model.name} (ID: ${modelId})`);
       } catch (error) {
-        console.log(`⚠️ Model ${model.name} might already exist`);
+        console.log(`⚠️ Model ${model.name} might already exist ${error}`);
       }
     }
 
@@ -203,7 +203,7 @@ export const seedDatabase = async () => {
         printerIds.push(printerId);
         console.log(`✅ Created printer: ${printer.name} (ID: ${printerId})`);
       } catch (error) {
-        console.log(`⚠️ Printer ${printer.name} might already exist`);
+        console.log(`⚠️ Printer ${printer.name} might already exist ${error}`);
       }
     }
 
@@ -315,7 +315,7 @@ export const seedPrintQueue = async () => {
         await printJobService.createPrintJob(printJob);
         console.log(`✅ Created print job for model: ${printJob.modelId}`);
       } catch (error) {
-        console.log(`⚠️ Print job for model ${printJob.modelId} might already exist`);
+        console.log(`⚠️ Print job for model ${printJob.modelId} might already exist ${error}`);
       }
     }
 

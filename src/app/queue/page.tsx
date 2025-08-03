@@ -1,6 +1,6 @@
 'use client';
 
-import { FC, useState, useEffect } from 'react';
+import { FC, useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { Printer, PrintJob, Model } from '@/types/models';
 import { printerService, printJobService, modelService } from '@/lib/firestore';
@@ -19,7 +19,7 @@ const QueuePage: FC = () => {
   const [useMockData, setUseMockData] = useState(false);
 
   // Mock data for fallback
-  const mockPrinters: Printer[] = [
+  const mockPrinters = useMemo<Printer[]>(() => [
     {
       id: '1',
       name: 'Levity Pro X1',
@@ -65,9 +65,9 @@ const QueuePage: FC = () => {
       createdAt: new Date('2024-01-20'),
       updatedAt: new Date()
     }
-  ];
+  ], []);
 
-  const mockPrintJobs: PrintJob[] = [
+  const mockPrintJobs = useMemo<PrintJob[]>(() => [
     {
       id: '1',
       modelId: 'model-1',
@@ -110,7 +110,7 @@ const QueuePage: FC = () => {
         bedTemperature: 100
       }
     }
-  ];
+  ], []);
 
   // Load data from Firebase or fallback to mock data
   useEffect(() => {
@@ -151,7 +151,7 @@ const QueuePage: FC = () => {
     };
 
     loadData();
-  }, []);
+  }, [mockPrintJobs, mockPrinters]);
 
   const handleAddPrinter = async (printer: Omit<Printer, 'id' | 'createdAt' | 'updatedAt'>) => {
     try {

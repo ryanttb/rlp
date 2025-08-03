@@ -1,14 +1,13 @@
 'use client';
 
 import { FC, useState, useEffect } from 'react';
-import { useRouter, useParams } from 'next/navigation';
+import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { Model } from '@/types/models';
 import { modelService } from '@/lib/firestore';
 import ModelViewer from '@/components/ModelViewer';
 
 const ModelDetailPage: FC = () => {
-  const router = useRouter();
   const params = useParams();
   const modelId = params.id as string;
   
@@ -174,7 +173,7 @@ const ModelDetailPage: FC = () => {
                   <div className="text-center">
                     <div className="text-4xl mb-4">🎯</div>
                     <p className="text-gray-600 dark:text-gray-300 mb-4">
-                      Click "View Model" to see the 3D preview
+                      Click &quot;Open 3D Viewer&quot; to see the 3D preview
                     </p>
                     <button
                       onClick={() => setIsViewerOpen(true)}
