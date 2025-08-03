@@ -207,12 +207,35 @@ export const seedDatabase = async () => {
       }
     }
 
-    // Seed print jobs (with actual model and printer IDs)
-    console.log('📋 Seeding print jobs...');
+    console.log('🎉 Database seeding completed successfully!');
+    console.log(`📊 Summary: ${modelIds.length} models, ${printerIds.length} printers`);
+    return { modelIds, printerIds };
+  } catch (error) {
+    console.error('❌ Error seeding database:', error);
+    return false;
+  }
+};
+
+export const seedPrintQueue = async () => {
+  try {
+    console.log('📋 Starting print queue seeding...');
+
+    // Get existing models and printers
+    const [models, printers] = await Promise.all([
+      modelService.getModels(),
+      printerService.getPrinters()
+    ]);
+
+    if (models.length === 0 || printers.length === 0) {
+      console.log('⚠️ No models or printers found. Please seed the database first.');
+      return false;
+    }
+
+    // Sample print jobs (with actual model and printer IDs)
     const samplePrintJobs: Omit<PrintJob, 'id' | 'createdAt' | 'updatedAt'>[] = [
       {
-        modelId: modelIds[0] || 'model-1', // Gear Assembly
-        printerId: printerIds[0] || 'printer-1',
+        modelId: models[0].id, // Gear Assembly
+        printerId: printers[0].id,
         status: 'printing',
         priority: 'high',
         estimatedDuration: 180,
@@ -231,8 +254,8 @@ export const seedDatabase = async () => {
         notes: 'High priority prototype for client demo'
       },
       {
-        modelId: modelIds[1] || 'model-2', // Artistic Vase
-        printerId: printerIds[1] || 'printer-2',
+        modelId: models[1].id, // Artistic Vase
+        printerId: printers[1].id,
         status: 'queued',
         priority: 'normal',
         estimatedDuration: 120,
@@ -247,8 +270,8 @@ export const seedDatabase = async () => {
         }
       },
       {
-        modelId: modelIds[2] || 'model-3', // Phone Stand
-        printerId: printerIds[0] || 'printer-1',
+        modelId: models[2].id, // Phone Stand
+        printerId: printers[0].id,
         status: 'completed',
         priority: 'low',
         estimatedDuration: 90,
@@ -268,8 +291,8 @@ export const seedDatabase = async () => {
         notes: 'Phone stand for office use'
       },
       {
-        modelId: modelIds[3] || 'model-4', // Custom Wrench
-        printerId: printerIds[3] || 'printer-4',
+        modelId: models[3].id, // Custom Wrench
+        printerId: printers[3].id,
         status: 'preparing',
         priority: 'high',
         estimatedDuration: 150,
@@ -286,6 +309,7 @@ export const seedDatabase = async () => {
       }
     ];
 
+    // Create print jobs
     for (const printJob of samplePrintJobs) {
       try {
         await printJobService.createPrintJob(printJob);
@@ -295,11 +319,11 @@ export const seedDatabase = async () => {
       }
     }
 
-    console.log('🎉 Database seeding completed successfully!');
-    console.log(`📊 Summary: ${modelIds.length} models, ${printerIds.length} printers, ${samplePrintJobs.length} print jobs`);
+    console.log('🎉 Print queue seeding completed successfully!');
+    console.log(`📊 Summary: ${samplePrintJobs.length} print jobs created`);
     return true;
   } catch (error) {
-    console.error('❌ Error seeding database:', error);
+    console.error('❌ Error seeding print queue:', error);
     return false;
   }
 };

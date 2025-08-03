@@ -2,7 +2,7 @@
 
 import { FC, useState, useEffect } from 'react';
 import Link from 'next/link';
-import { seedDatabase, clearDatabase, checkDatabaseStatus } from '@/lib/databaseSeeder';
+import { seedDatabase, seedPrintQueue, clearDatabase, checkDatabaseStatus } from '@/lib/databaseSeeder';
 
 const AdminPage: FC = () => {
   const [dbStatus, setDbStatus] = useState<{
@@ -30,7 +30,7 @@ const AdminPage: FC = () => {
   };
 
   const handleSeedDatabase = async () => {
-    if (!confirm('This will add sample categories and models to the database. Continue?')) {
+    if (!confirm('This will add sample categories, models, and printers to the database. Continue?')) {
       return;
     }
 
@@ -49,8 +49,32 @@ const AdminPage: FC = () => {
     }
   };
 
+  const handleSeedPrintQueue = async () => {
+    if (!confirm('This will add sample print jobs to the queue. Make sure you have models and printers first. Continue?')) {
+      return;
+    }
+
+    setLoading(true);
+    setMessage(null);
+
+    try {
+      const result = await seedPrintQueue();
+      if (result) {
+        setMessage({ type: 'success', text: 'Print queue seeded successfully!' });
+      } else {
+        setMessage({ type: 'error', text: 'No models or printers found. Please seed the database first.' });
+      }
+      await loadDbStatus();
+    } catch (error) {
+      console.error('Error seeding print queue:', error);
+      setMessage({ type: 'error', text: 'Failed to seed print queue' });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleClearDatabase = async () => {
-    if (!confirm('This will delete ALL categories and models from the database. This action cannot be undone. Continue?')) {
+    if (!confirm('This will delete ALL categories, models, printers, and print jobs from the database. This action cannot be undone. Continue?')) {
       return;
     }
 
@@ -89,6 +113,9 @@ const AdminPage: FC = () => {
               </Link>
               <Link href="/models" className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
                 3D Models
+              </Link>
+              <Link href="/queue" className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+                Print Queue
               </Link>
               <Link href="/admin" className="text-blue-600 dark:text-blue-400 font-semibold">
                 Admin
@@ -170,14 +197,14 @@ const AdminPage: FC = () => {
         )}
 
         {/* Actions */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {/* Seed Database */}
           <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg">
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
               Seed Database
             </h3>
             <p className="text-gray-600 dark:text-gray-300 mb-4">
-              Add sample categories and models to the database for testing and demonstration purposes.
+              Add sample categories, models, and printers to the database.
             </p>
             <button
               onClick={handleSeedDatabase}
@@ -188,13 +215,30 @@ const AdminPage: FC = () => {
             </button>
           </div>
 
+          {/* Seed Print Queue */}
+          <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+              Seed Print Queue
+            </h3>
+            <p className="text-gray-600 dark:text-gray-300 mb-4">
+              Add sample print jobs linking models to printers.
+            </p>
+            <button
+              onClick={handleSeedPrintQueue}
+              disabled={loading}
+              className="w-full bg-purple-600 hover:bg-purple-700 disabled:bg-purple-400 text-white py-3 px-4 rounded-lg font-medium transition-colors"
+            >
+              {loading ? 'Seeding...' : 'Seed Print Queue'}
+            </button>
+          </div>
+
           {/* Clear Database */}
           <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg">
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
               Clear Database
             </h3>
             <p className="text-gray-600 dark:text-gray-300 mb-4">
-              Remove all categories and models from the database. This action cannot be undone.
+              Remove all data from the database. This action cannot be undone.
             </p>
             <button
               onClick={handleClearDatabase}
@@ -233,7 +277,25 @@ const AdminPage: FC = () => {
                 <li>• Phone Stand (STL, 500KB) - Household Items</li>
                 <li>• Custom Wrench (STL, 1.5MB) - Tools & Equipment</li>
                 <li>• DNA Model (3MF, 3MB) - Educational</li>
-                <li>• Bracket Prototype (STL, 750KB) - Prototypes</li>
+                <li>• Bracket Prototype (STL, 1MB) - Prototypes</li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="font-medium text-gray-900 dark:text-white mb-2">Sample Printers:</h4>
+              <ul className="text-sm text-gray-600 dark:text-gray-300 space-y-1">
+                <li>• Levity Pro X1 - High-speed production printer</li>
+                <li>• Service Printer Alpha - Cloud-connected service printer</li>
+                <li>• Levity Mini - Compact prototyping printer</li>
+                <li>• Production Printer Beta - High-volume batch printer</li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="font-medium text-gray-900 dark:text-white mb-2">Sample Print Jobs:</h4>
+              <ul className="text-sm text-gray-600 dark:text-gray-300 space-y-1">
+                <li>• Gear Assembly - Printing (25% complete)</li>
+                <li>• Artistic Vase - Queued</li>
+                <li>• Phone Stand - Completed</li>
+                <li>• Custom Wrench - Preparing</li>
               </ul>
             </div>
           </div>
