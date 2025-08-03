@@ -1,6 +1,6 @@
-import { categoryService, modelService } from './firestore';
+import { categoryService, modelService, printerService, printJobService } from './firestore';
 import { defaultCategories } from './defaultData';
-import { Model } from '@/types/models';
+import { Model, Printer, PrintJob } from '@/types/models';
 
 // Sample models for testing
 const sampleModels: Omit<Model, 'id' | 'createdAt' | 'updatedAt'>[] = [
@@ -100,11 +100,11 @@ const sampleModels: Omit<Model, 'id' | 'createdAt' | 'updatedAt'>[] = [
     category: 'Prototypes',
     tags: ['prototype', 'bracket', 'mounting', 'lightweight'],
     fileUrl: 'https://example.com/models/bracket-prototype.stl',
-    fileSize: 768000, // 750KB
+    fileSize: 1024000, // 1MB
     fileType: 'stl',
     dimensions: { width: 25, height: 15, depth: 8 },
     userId: 'demo-user',
-    status: 'processing',
+    status: 'ready',
     printSettings: {
       layerHeight: 0.2,
       infill: 40,
@@ -114,73 +114,232 @@ const sampleModels: Omit<Model, 'id' | 'createdAt' | 'updatedAt'>[] = [
   },
 ];
 
+// Sample printers for testing
+const samplePrinters: Omit<Printer, 'id' | 'createdAt' | 'updatedAt'>[] = [
+  {
+    name: 'Levity Pro X1',
+    type: 'Levity',
+    status: 'printing',
+    location: 'Production Lab A',
+    description: 'High-speed liquid printing system with advanced material handling',
+    capabilities: {
+      maxBuildVolume: { width: 300, height: 300, depth: 400 },
+      supportedMaterials: ['PLA', 'ABS', 'PETG', 'TPU'],
+      layerHeightRange: { min: 0.1, max: 0.3 }
+    }
+  },
+  {
+    name: 'Service Printer Alpha',
+    type: 'Print as a Service',
+    status: 'online',
+    location: 'Service Center B',
+    description: 'Cloud-connected service printer for remote operations',
+    capabilities: {
+      maxBuildVolume: { width: 250, height: 250, depth: 300 },
+      supportedMaterials: ['PLA', 'ABS', 'Resin'],
+      layerHeightRange: { min: 0.05, max: 0.2 }
+    }
+  },
+  {
+    name: 'Levity Mini',
+    type: 'Levity',
+    status: 'maintenance',
+    location: 'R&D Lab',
+    description: 'Compact liquid printing system for prototyping',
+    capabilities: {
+      maxBuildVolume: { width: 150, height: 150, depth: 200 },
+      supportedMaterials: ['PLA', 'Resin'],
+      layerHeightRange: { min: 0.1, max: 0.25 }
+    }
+  },
+  {
+    name: 'Production Printer Beta',
+    type: 'Levity',
+    status: 'online',
+    location: 'Production Lab B',
+    description: 'High-volume production printer for batch manufacturing',
+    capabilities: {
+      maxBuildVolume: { width: 400, height: 400, depth: 500 },
+      supportedMaterials: ['PLA', 'ABS', 'PETG', 'TPU', 'PC'],
+      layerHeightRange: { min: 0.08, max: 0.4 }
+    }
+  }
+];
+
+// Sample print jobs for testing
+const samplePrintJobs: Omit<PrintJob, 'id' | 'createdAt' | 'updatedAt'>[] = [
+  {
+    modelId: 'model-1',
+    printerId: 'printer-1',
+    status: 'printing',
+    priority: 'high',
+    estimatedDuration: 180,
+    actualDuration: 45,
+    progress: 25,
+    startedAt: new Date(Date.now() - 45 * 60 * 1000),
+    userId: 'demo-user',
+    printSettings: {
+      layerHeight: 0.2,
+      infill: 20,
+      support: true,
+      material: 'PLA',
+      temperature: 200,
+      bedTemperature: 60
+    },
+    notes: 'High priority prototype for client demo'
+  },
+  {
+    modelId: 'model-2',
+    printerId: 'printer-2',
+    status: 'queued',
+    priority: 'normal',
+    estimatedDuration: 120,
+    userId: 'demo-user',
+    printSettings: {
+      layerHeight: 0.15,
+      infill: 15,
+      support: false,
+      material: 'ABS',
+      temperature: 230,
+      bedTemperature: 100
+    }
+  },
+  {
+    modelId: 'model-3',
+    printerId: 'printer-1',
+    status: 'completed',
+    priority: 'low',
+    estimatedDuration: 90,
+    actualDuration: 85,
+    progress: 100,
+    startedAt: new Date(Date.now() - 2 * 60 * 60 * 1000),
+    completedAt: new Date(Date.now() - 35 * 60 * 1000),
+    userId: 'demo-user',
+    printSettings: {
+      layerHeight: 0.2,
+      infill: 25,
+      support: false,
+      material: 'PLA',
+      temperature: 200,
+      bedTemperature: 60
+    },
+    notes: 'Phone stand for office use'
+  }
+];
+
 export const seedDatabase = async () => {
   try {
-    console.log('Starting database seeding...');
+    console.log('🌱 Starting database seeding...');
 
     // Seed categories
-    console.log('Seeding categories...');
-    const categoryPromises = defaultCategories.map(category => 
-      categoryService.createCategory(category)
-    );
-    const categoryIds = await Promise.all(categoryPromises);
-    console.log(`Created ${categoryIds.length} categories`);
+    console.log('📂 Seeding categories...');
+    for (const category of defaultCategories) {
+      try {
+        await categoryService.createCategory(category);
+        console.log(`✅ Created category: ${category.name}`);
+      } catch (error) {
+        console.log(`⚠️ Category ${category.name} might already exist`);
+      }
+    }
 
-    // Seed sample models
-    console.log('Seeding sample models...');
-    const modelPromises = sampleModels.map(model => 
-      modelService.createModel(model)
-    );
-    const modelIds = await Promise.all(modelPromises);
-    console.log(`Created ${modelIds.length} sample models`);
+    // Seed models
+    console.log('🎨 Seeding models...');
+    for (const model of sampleModels) {
+      try {
+        await modelService.createModel(model);
+        console.log(`✅ Created model: ${model.name}`);
+      } catch (error) {
+        console.log(`⚠️ Model ${model.name} might already exist`);
+      }
+    }
 
-    console.log('Database seeding completed successfully!');
-    return { categoryIds, modelIds };
+    // Seed printers
+    console.log('🖨️ Seeding printers...');
+    const printerIds: string[] = [];
+    for (const printer of samplePrinters) {
+      try {
+        const printerId = await printerService.createPrinter(printer);
+        printerIds.push(printerId);
+        console.log(`✅ Created printer: ${printer.name}`);
+      } catch (error) {
+        console.log(`⚠️ Printer ${printer.name} might already exist`);
+      }
+    }
+
+    // Seed print jobs (with actual printer IDs)
+    console.log('📋 Seeding print jobs...');
+    for (let i = 0; i < samplePrintJobs.length; i++) {
+      const printJob = samplePrintJobs[i];
+      try {
+        // Use actual printer IDs if available, otherwise use placeholder
+        const printerId = printerIds[i] || `printer-${i + 1}`;
+        const jobWithPrinterId = {
+          ...printJob,
+          printerId
+        };
+        await printJobService.createPrintJob(jobWithPrinterId);
+        console.log(`✅ Created print job: ${printJob.modelId}`);
+      } catch (error) {
+        console.log(`⚠️ Print job ${printJob.modelId} might already exist`);
+      }
+    }
+
+    console.log('🎉 Database seeding completed successfully!');
+    return true;
   } catch (error) {
-    console.error('Error seeding database:', error);
-    throw error;
+    console.error('❌ Error seeding database:', error);
+    return false;
   }
 };
 
 export const clearDatabase = async () => {
   try {
-    console.log('Clearing database...');
-    
-    // Get all categories and models
-    const categories = await categoryService.getCategories();
-    const models = await modelService.getModels();
-    
-    // Delete all models
-    const modelDeletePromises = models.map(model => 
-      modelService.deleteModel(model.id)
-    );
-    await Promise.all(modelDeletePromises);
-    
-    // Delete all categories
-    const categoryDeletePromises = categories.map(category => 
-      categoryService.deleteCategory(category.id)
-    );
-    await Promise.all(categoryDeletePromises);
-    
-    console.log('Database cleared successfully!');
+    console.log('🧹 Starting database cleanup...');
+
+    // Get all documents
+    const [models, categories, printers, printJobs] = await Promise.all([
+      modelService.getModels(),
+      categoryService.getCategories(),
+      printerService.getPrinters(),
+      printJobService.getPrintJobs()
+    ]);
+
+    // Delete all documents
+    const deletePromises = [
+      ...models.map(model => modelService.deleteModel(model.id)),
+      ...categories.map(category => categoryService.deleteCategory(category.id)),
+      ...printers.map(printer => printerService.deletePrinter(printer.id)),
+      ...printJobs.map(job => printJobService.deletePrintJob(job.id))
+    ];
+
+    await Promise.all(deletePromises);
+
+    console.log('✅ Database cleared successfully!');
+    return true;
   } catch (error) {
-    console.error('Error clearing database:', error);
-    throw error;
+    console.error('❌ Error clearing database:', error);
+    return false;
   }
 };
 
 export const checkDatabaseStatus = async () => {
   try {
-    const categories = await categoryService.getCategories();
-    const models = await modelService.getModels();
-    
+    const [models, categories, printers, printJobs] = await Promise.all([
+      modelService.getModels(),
+      categoryService.getCategories(),
+      printerService.getPrinters(),
+      printJobService.getPrintJobs()
+    ]);
+
     return {
-      categories: categories.length,
       models: models.length,
-      hasData: categories.length > 0 || models.length > 0,
+      categories: categories.length,
+      printers: printers.length,
+      printJobs: printJobs.length,
+      total: models.length + categories.length + printers.length + printJobs.length
     };
   } catch (error) {
-    console.error('Error checking database status:', error);
-    throw error;
+    console.error('❌ Error checking database status:', error);
+    return null;
   }
 }; 
