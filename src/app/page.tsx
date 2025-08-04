@@ -41,36 +41,46 @@ const Home: FC = () => {
               color="from-purple-500 to-pink-500"
             />
           </Link>
-          <FeatureCard
-            title="Print Queue Management"
-            description="Real-time monitoring and control of print jobs with live status updates."
-            icon="🖨️"
-            color="from-green-500 to-teal-500"
-          />
-          <FeatureCard
-            title="Production Workflows"
-            description="Streamlined processes for manufacturing operations and quality control."
-            icon="⚙️"
-            color="from-orange-500 to-red-500"
-          />
-          <FeatureCard
-            title="Real-time Machine Interaction"
-            description="Live communication with 3D printing systems for optimal performance."
-            icon="🔗"
-            color="from-blue-500 to-cyan-500"
-          />
-          <FeatureCard
-            title="Cloud-Deployed Platform"
-            description="Scalable architecture designed for enterprise-level 3D printing operations."
-            icon="☁️"
-            color="from-indigo-500 to-purple-500"
-          />
-          <FeatureCard
-            title="Advanced Analytics"
-            description="Comprehensive insights into print performance and production efficiency."
-            icon="📊"
-            color="from-yellow-500 to-orange-500"
-          />
+          <Link href="/queue" className="block">
+            <FeatureCard
+              title="Print Queue Management"
+              description="Real-time monitoring and control of print jobs with live status updates."
+              icon="🖨️"
+              color="from-green-500 to-teal-500"
+            />
+          </Link>
+          <Link href="/workflows" className="block">
+            <FeatureCard
+              title="Production Workflows"
+              description="Streamlined processes for manufacturing operations and quality control."
+              icon="⚙️"
+              color="from-orange-500 to-red-500"
+            />
+          </Link>
+          <Link href="/machine" className="block">
+            <FeatureCard
+              title="Real-time Machine Interaction"
+              description="Live communication with 3D printing systems for optimal performance."
+              icon="🔗"
+              color="from-blue-500 to-cyan-500"
+            />
+          </Link>
+          <Link href="/cloud" className="block">
+            <FeatureCard
+              title="Cloud-Deployed Platform"
+              description="Scalable architecture designed for enterprise-level 3D printing operations."
+              icon="☁️"
+              color="from-indigo-500 to-purple-500"
+            />
+          </Link>
+          <Link href="/analytics" className="block">
+            <FeatureCard
+              title="Advanced Analytics"
+              description="Comprehensive insights into print performance and production efficiency."
+              icon="📊"
+              color="from-yellow-500 to-orange-500"
+            />
+          </Link>
         </div>
 
         {/* Tech Stack Section */}
