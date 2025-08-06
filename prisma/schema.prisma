@@ -1,0 +1,97 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  models    Model[]
+  printJobs PrintJob[]
+  printers  Printer[]
+
+  @@map("users")
+}
+
+model Model {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  fileUrl     String
+  thumbnailUrl String?
+  technology  String   // e.g., "FDM", "SLA", "DLP"
+  status      String   @default("active") // active, archived, deleted
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  userId      String
+  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  printJobs   PrintJob[]
+
+  @@map("models")
+}
+
+model Printer {
+  id          String   @id @default(cuid())
+  name        String
+  model       String
+  technology  String   // e.g., "FDM", "SLA", "DLP"
+  status      String   @default("available") // available, busy, maintenance, offline
+  location    String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  userId      String
+  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  printJobs   PrintJob[]
+
+  @@map("printers")
+}
+
+model PrintJob {
+  id          String   @id @default(cuid())
+  status      String   @default("queued") // queued, printing, completed, failed, cancelled
+  priority    Int      @default(1) // 1 = highest, 5 = lowest
+  estimatedDuration Int? // in minutes
+  actualDuration    Int? // in minutes
+  startedAt   DateTime?
+  completedAt DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  modelId     String
+  model       Model    @relation(fields: [modelId], references: [id], onDelete: Cascade)
+  printerId   String
+  printer     Printer  @relation(fields: [printerId], references: [id], onDelete: Cascade)
+
+  @@map("print_jobs")
+}
+
+model Workflow {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  steps       Json     // Array of workflow steps
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("workflows")
+} 
