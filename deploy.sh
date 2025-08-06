@@ -15,12 +15,9 @@ if ! gcloud auth list --filter=status:ACTIVE --format="value(account)" | grep -q
     gcloud auth login
 fi
 
-# Check if project is set
-if [ -z "$GOOGLE_CLOUD_PROJECT" ]; then
-    echo "📋 Please set your GCP project ID:"
-    echo "export GOOGLE_CLOUD_PROJECT=your-project-id"
-    exit 1
-fi
+# Set default project if not specified
+export GOOGLE_CLOUD_PROJECT=${GOOGLE_CLOUD_PROJECT:-"rlp-online"}
+echo "📋 Using GCP project: $GOOGLE_CLOUD_PROJECT"
 
 echo "📦 Building the application..."
 npm run build
