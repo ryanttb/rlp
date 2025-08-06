@@ -164,7 +164,7 @@ const AnalyticsPage: FC = () => {
           <div className="bg-white dark:bg-gray-800 rounded-2xl p-8 shadow-lg">
             <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-6">Monthly Growth Trends</h3>
             <div className="space-y-4">
-              {mockData.monthlyStats.map((stat, index) => (
+              {mockData.monthlyStats.map((stat) => (
                 <div key={stat.month} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
                   <span className="text-gray-700 dark:text-gray-300 font-medium">{stat.month}</span>
                   <div className="flex space-x-6">

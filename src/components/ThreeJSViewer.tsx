@@ -8,7 +8,7 @@ import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js';
 import { PLYLoader } from 'three/examples/jsm/loaders/PLYLoader.js';
 import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader.js';
 import { ColladaLoader } from 'three/examples/jsm/loaders/ColladaLoader.js';
-import { getSignedUrl } from '@/lib/storage';
+// Removed direct import of storage module to avoid client-side bundling issues
 
 interface ThreeJSViewerProps {
   fileUrl: string;
@@ -129,37 +129,57 @@ const ThreeJSViewer: FC<ThreeJSViewerProps> = ({ fileUrl, fileType, dimensions }
         sceneRef.current.remove(modelRef.current);
       }
 
-      // Handle Firebase Storage URLs (CORS fix)
+      // Get signed URL for Google Cloud Storage files
       let finalUrl = url;
-      let fileData: ArrayBuffer | null = null;
       
-      if (url.includes('firebasestorage.googleapis.com')) {
+      // Check if this is a Google Cloud Storage URL or if we need to get a signed URL
+      if (url.includes('storage.googleapis.com') || url.includes('firebasestorage.googleapis.com')) {
         try {
-          // Extract the file path from the Firebase Storage URL
-          const urlParts = url.split('/o/');
-          if (urlParts.length > 1) {
-            const filePath = decodeURIComponent(urlParts[1].split('?')[0]);
-            console.log('Extracted file path:', filePath);
-            
-            // Try to get file data directly (bypasses CORS)
-            try {
-              fileData = await storageService.getFileData(filePath);
-              console.log('Got file data as ArrayBuffer, size:', fileData.byteLength);
-            } catch (dataError) {
-              console.warn('Could not get file data, trying URL approach:', dataError);
-              // Fallback to URL approach
-              try {
-                finalUrl = await storageService.getFreshDownloadURL(filePath);
-                console.log('Got fresh download URL:', finalUrl);
-              } catch (urlError) {
-                console.warn('URL approach failed, trying with params:', urlError);
-                finalUrl = await storageService.getDownloadURLWithParams(filePath);
-                console.log('Got download URL with params:', finalUrl);
-              }
+          // Extract the file path from the URL
+          let filePath: string;
+          
+          if (url.includes('storage.googleapis.com')) {
+            // Google Cloud Storage URL format: https://storage.googleapis.com/BUCKET_NAME/FILE_PATH
+            const urlParts = url.split('storage.googleapis.com/');
+            if (urlParts.length > 1) {
+              filePath = urlParts[1];
+            } else {
+              throw new Error('Could not extract file path from Google Cloud Storage URL');
+            }
+          } else {
+            // Firebase Storage URL format: https://firebasestorage.googleapis.com/v0/b/BUCKET/o/FILE_PATH
+            const urlParts = url.split('/o/');
+            if (urlParts.length > 1) {
+              filePath = decodeURIComponent(urlParts[1].split('?')[0]);
+            } else {
+              throw new Error('Could not extract file path from Firebase Storage URL');
             }
           }
+          
+          console.log('Extracted file path:', filePath);
+          
+          // Get a signed URL for the file via API route
+          const response = await fetch('/api/signed-url', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              filename: filePath,
+              action: 'read',
+              expiresIn: 3600 // 1 hour expiry
+            }),
+          });
+          
+          if (response.ok) {
+            const data = await response.json();
+            finalUrl = data.signedUrl;
+            console.log('Got signed URL:', finalUrl);
+          } else {
+            console.warn('Failed to get signed URL, using original URL');
+          }
         } catch (urlError) {
-          console.warn('Could not get fresh download URL, using original:', urlError);
+          console.warn('Could not get signed URL, using original URL:', urlError);
           // Keep the original URL as fallback
         }
       }
@@ -170,27 +190,20 @@ const ThreeJSViewer: FC<ThreeJSViewerProps> = ({ fileUrl, fileType, dimensions }
       switch (type) {
         case 'stl':
           const stlLoader = new STLLoader();
-          if (fileData) {
-            // Use file data directly (bypasses CORS)
-            console.log('Loading STL from ArrayBuffer data');
-            geometry = stlLoader.parse(fileData);
-          } else {
-            // Fallback to URL loading
-            console.log('Loading STL from URL');
-            geometry = await new Promise<THREE.BufferGeometry>((resolve, reject) => {
-              stlLoader.load(
-                finalUrl, 
-                resolve, 
-                (progress) => {
-                  console.log('STL loading progress:', progress);
-                }, 
-                (error) => {
-                  console.error('STL loading error:', error);
-                  reject(new Error(`Failed to load STL file: ${error instanceof Error ? error.message : 'CORS or network error'}`));
-                }
-              );
-            });
-          }
+          console.log('Loading STL from URL:', finalUrl);
+          geometry = await new Promise<THREE.BufferGeometry>((resolve, reject) => {
+            stlLoader.load(
+              finalUrl, 
+              resolve, 
+              (progress) => {
+                console.log('STL loading progress:', progress);
+              }, 
+              (error) => {
+                console.error('STL loading error:', error);
+                reject(new Error(`Failed to load STL file: ${error instanceof Error ? error.message : 'CORS or network error'}`));
+              }
+            );
+          });
           material = new THREE.MeshPhongMaterial({ 
             color: 0x156289, 
             emissive: 0x072534, 
@@ -201,23 +214,16 @@ const ThreeJSViewer: FC<ThreeJSViewerProps> = ({ fileUrl, fileType, dimensions }
 
         case 'obj':
           const objLoader = new OBJLoader();
-          if (fileData) {
-            // Use file data directly (bypasses CORS)
-            console.log('Loading OBJ from ArrayBuffer data');
-            const text = new TextDecoder().decode(fileData);
-            modelRef.current = objLoader.parse(text);
-          } else {
-            // Fallback to URL loading
-            console.log('Loading OBJ from URL');
-            const objGroup = await new Promise<THREE.Group>((resolve, reject) => {
-              objLoader.load(finalUrl, resolve, undefined, reject);
-            });
-            modelRef.current = objGroup;
-          }
+          console.log('Loading OBJ from URL:', finalUrl);
+          const objGroup = await new Promise<THREE.Group>((resolve, reject) => {
+            objLoader.load(finalUrl, resolve, undefined, reject);
+          });
+          modelRef.current = objGroup;
           break;
 
         case 'ply':
           const plyLoader = new PLYLoader();
+          console.log('Loading PLY from URL:', finalUrl);
           geometry = await new Promise<THREE.BufferGeometry>((resolve, reject) => {
             plyLoader.load(finalUrl, resolve, undefined, reject);
           });
@@ -229,6 +235,7 @@ const ThreeJSViewer: FC<ThreeJSViewerProps> = ({ fileUrl, fileType, dimensions }
 
         case 'fbx':
           const fbxLoader = new FBXLoader();
+          console.log('Loading FBX from URL:', finalUrl);
           const fbxGroup = await new Promise<THREE.Group>((resolve, reject) => {
             fbxLoader.load(finalUrl, resolve, undefined, reject);
           });
@@ -237,6 +244,7 @@ const ThreeJSViewer: FC<ThreeJSViewerProps> = ({ fileUrl, fileType, dimensions }
 
         case 'dae':
           const colladaLoader = new ColladaLoader();
+          console.log('Loading DAE from URL:', finalUrl);
           const colladaScene = await new Promise<{ scene: THREE.Scene }>((resolve, reject) => {
             colladaLoader.load(finalUrl, resolve, undefined, reject);
           });
