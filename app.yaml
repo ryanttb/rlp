@@ -1,14 +1,7 @@
 runtime: nodejs20
-service: default
+env: standard
 
-env_variables:
-  NODE_ENV: "production"
-  # Database connection
-  DATABASE_URL: "postgresql://rlp_user:${DB_PASSWORD}@/${DATABASE_NAME}?host=/cloudsql/${PROJECT_ID}:${REGION}:${INSTANCE_NAME}"
-  # Cloud Storage
-  CLOUD_STORAGE_BUCKET: "${PROJECT_ID}-static-assets"
-  # App Engine specific
-  PORT: "8080"
+instance_class: F1
 
 automatic_scaling:
   target_cpu_utilization: 0.65
@@ -16,13 +9,12 @@ automatic_scaling:
   max_instances: 10
   target_throughput_utilization: 0.6
 
-resources:
-  cpu: 1
-  memory_gb: 0.5
-  disk_size_gb: 10
+env_variables:
+  NODE_ENV: production
+  GOOGLE_CLOUD_PROJECT: "your-project-id"
+  CLOUD_STORAGE_BUCKET: "your-storage-bucket"
 
 handlers:
-  # Serve static files
   - url: /_next/static
     static_dir: .next/static
     secure: always
@@ -31,10 +23,6 @@ handlers:
     static_dir: public
     secure: always
 
-  # All other requests go to the Node.js app
   - url: /.*
     script: auto
-    secure: always
-
-beta_settings:
-  cloud_sql_instances: "${PROJECT_ID}:${REGION}:${INSTANCE_NAME}" 
+    secure: always 

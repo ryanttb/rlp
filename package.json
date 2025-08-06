@@ -9,7 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@google-cloud/storage": "^7.7.0",
+    "@google-cloud/storage": "^7.16.0",
     "@prisma/client": "^5.7.0",
     "@types/three": "^0.178.1",
     "firebase": "^12.0.0",

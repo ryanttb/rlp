@@ -8,7 +8,7 @@ import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js';
 import { PLYLoader } from 'three/examples/jsm/loaders/PLYLoader.js';
 import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader.js';
 import { ColladaLoader } from 'three/examples/jsm/loaders/ColladaLoader.js';
-import { storageService } from '@/lib/storage';
+import { getSignedUrl } from '@/lib/storage';
 
 interface ThreeJSViewerProps {
   fileUrl: string;
