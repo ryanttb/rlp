@@ -32,7 +32,6 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
-terraform.tfvars
 
 # vercel
 .vercel
@@ -40,3 +39,8 @@ terraform.tfvars
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# terraform
+terraform.tfvars
+tfplan*
+terraform/.terraform/

@@ -1,4 +1,6 @@
 # Copy this file to terraform.tfvars and update with your values
 project_id = "your-gcp-project-id"
 region     = "us-central1"
-zone       = "us-central1-a" 
+zone       = "us-central1-a"
+db_password = "your-secure-database-password"
+environment = "dev" 
