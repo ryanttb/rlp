@@ -3,4 +3,13 @@ project_id = "your-gcp-project-id"
 region     = "us-central1"
 zone       = "us-central1-a"
 db_password = "your-secure-database-password"
-environment = "dev" 
+environment = "dev"
+
+# Cloud SQL Security Configuration
+# WARNING: Public IP with 0.0.0.0/0 is for development only!
+enable_public_ip = true
+authorized_networks = ["0.0.0.0/0"]  # Restrict this for production!
+
+# For production, use:
+# enable_public_ip = false
+# authorized_networks = []  # Not used when public IP is disabled 

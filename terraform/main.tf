@@ -88,9 +88,18 @@ resource "google_sql_database_instance" "postgres" {
     tier = "db-f1-micro"
     
     ip_configuration {
-      ipv4_enabled                                  = false
+      ipv4_enabled                                  = var.enable_public_ip
       private_network                               = google_compute_network.vpc.id
       enable_private_path_for_google_cloud_services = true
+      
+      # Authorized networks (only if public IP is enabled)
+      dynamic "authorized_networks" {
+        for_each = var.enable_public_ip ? var.authorized_networks : []
+        content {
+          name  = "network-${index(var.authorized_networks, authorized_networks.value)}"
+          value = authorized_networks.value
+        }
+      }
     }
     
     backup_configuration {
@@ -148,8 +157,17 @@ output "database_private_ip" {
   description = "The private IP address of the Cloud SQL instance"
 }
 
+output "database_public_ip" {
+  value = var.enable_public_ip ? google_sql_database_instance.postgres.public_ip_address : null
+  description = "The public IP address of the Cloud SQL instance (if enabled)"
+}
+
 output "database_url" {
-  value = "postgresql://${google_sql_user.app_user.name}:${var.db_password}@${google_sql_database_instance.postgres.private_ip_address}:5432/${google_sql_database.database.name}"
+  value = var.enable_public_ip ? (
+    "postgresql://${google_sql_user.app_user.name}:${var.db_password}@${google_sql_database_instance.postgres.public_ip_address}:5432/${google_sql_database.database.name}"
+  ) : (
+    "postgresql://${google_sql_user.app_user.name}:${var.db_password}@${google_sql_database_instance.postgres.private_ip_address}:5432/${google_sql_database.database.name}"
+  )
   description = "Database URL for the application"
   sensitive = true
 } 
