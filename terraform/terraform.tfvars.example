@@ -5,11 +5,26 @@ zone       = "us-central1-a"
 db_password = "your-secure-database-password"
 environment = "dev"
 
-# Cloud SQL Security Configuration
-# WARNING: Public IP with 0.0.0.0/0 is for development only!
-enable_public_ip = true
-authorized_networks = ["0.0.0.0/0"]  # Restrict this for production!
+# Development Database Configuration
+enable_dev_instance = true
+dev_authorized_networks = ["0.0.0.0/0"]  # WARNING: This allows all IPs - restrict for production!
 
-# For production, use:
-# enable_public_ip = false
-# authorized_networks = []  # Not used when public IP is disabled 
+# Production Database Configuration
+enable_prod_instance = false  # Set to true when ready for production
+prod_tier = "db-f1-micro"     # Use larger tier for production (e.g., db-n1-standard-1)
+prod_deletion_protection = true
+
+# Example configurations:
+
+# Development only:
+# enable_dev_instance = true
+# enable_prod_instance = false
+
+# Production only:
+# enable_dev_instance = false
+# enable_prod_instance = true
+# prod_tier = "db-n1-standard-1"
+
+# Both environments:
+# enable_dev_instance = true
+# enable_prod_instance = true 

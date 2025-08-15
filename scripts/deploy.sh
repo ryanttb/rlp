@@ -94,6 +94,42 @@ setup_database() {
     echo -e "${GREEN}✅ Database setup complete${NC}"
 }
 
+# Setup environment-specific database
+setup_environment_database() {
+    local environment=$1
+    
+    echo -e "${YELLOW}Setting up ${environment} database...${NC}"
+    
+    # Get the appropriate database URL from Terraform outputs
+    if [ "$environment" = "dev" ]; then
+        DATABASE_URL=$(cd terraform && terraform output -raw database_dev_url 2>/dev/null || echo "")
+        if [ -z "$DATABASE_URL" ]; then
+            echo -e "${RED}❌ Development database URL not found. Make sure enable_dev_instance = true in terraform.tfvars${NC}"
+            return 1
+        fi
+    elif [ "$environment" = "prod" ]; then
+        DATABASE_URL=$(cd terraform && terraform output -raw database_prod_url 2>/dev/null || echo "")
+        if [ -z "$DATABASE_URL" ]; then
+            echo -e "${RED}❌ Production database URL not found. Make sure enable_prod_instance = true in terraform.tfvars${NC}"
+            return 1
+        fi
+    else
+        echo -e "${RED}❌ Unknown environment: $environment${NC}"
+        return 1
+    fi
+    
+    # Export the database URL for Prisma
+    export DATABASE_URL
+    
+    # Generate Prisma client
+    npx prisma generate
+    
+    # Run database migrations
+    npx prisma db push
+    
+    echo -e "${GREEN}✅ ${environment} database setup complete${NC}"
+}
+
 # Build and deploy application
 deploy_application() {
     echo -e "${YELLOW}Building and deploying application...${NC}"
@@ -112,13 +148,15 @@ deploy_application() {
 
 # Main deployment flow
 main() {
+    local environment=${1:-"dev"}
+    
     check_requirements
     authenticate_gcp
     deploy_infrastructure
-    setup_database
+    setup_environment_database "$environment"
     deploy_application
     
-    echo -e "${GREEN}🎉 Deployment completed successfully!${NC}"
+    echo -e "${GREEN}🎉 ${environment} deployment completed successfully!${NC}"
     echo -e "${GREEN}Your application is now running on Google Cloud Platform${NC}"
 }
 

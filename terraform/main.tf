@@ -77,9 +77,10 @@ resource "google_service_networking_connection" "private_vpc_connection" {
   depends_on = [google_project_service.required_apis]
 }
 
-# Create Cloud SQL PostgreSQL instance
-resource "google_sql_database_instance" "postgres" {
-  name             = "${var.project_id}-postgres-${var.environment}"
+# Create Cloud SQL PostgreSQL instances for different environments
+resource "google_sql_database_instance" "postgres_dev" {
+  count            = var.enable_dev_instance ? 1 : 0
+  name             = "${var.project_id}-postgres-dev"
   database_version = "POSTGRES_15"
   region           = var.region
   deletion_protection = false
@@ -88,15 +89,15 @@ resource "google_sql_database_instance" "postgres" {
     tier = "db-f1-micro"
     
     ip_configuration {
-      ipv4_enabled                                  = var.enable_public_ip
+      ipv4_enabled                                  = true  # Public IP for dev
       private_network                               = google_compute_network.vpc.id
       enable_private_path_for_google_cloud_services = true
       
-      # Authorized networks (only if public IP is enabled)
+      # Authorized networks for development
       dynamic "authorized_networks" {
-        for_each = var.enable_public_ip ? var.authorized_networks : []
+        for_each = var.dev_authorized_networks
         content {
-          name  = "network-${index(var.authorized_networks, authorized_networks.value)}"
+          name  = "dev-network-${index(var.dev_authorized_networks, authorized_networks.value)}"
           value = authorized_networks.value
         }
       }
@@ -117,16 +118,66 @@ resource "google_sql_database_instance" "postgres" {
   depends_on = [google_service_networking_connection.private_vpc_connection]
 }
 
-# Create database
-resource "google_sql_database" "database" {
-  name     = "rlp_database"
-  instance = google_sql_database_instance.postgres.name
+resource "google_sql_database_instance" "postgres_prod" {
+  count            = var.enable_prod_instance ? 1 : 0
+  name             = "${var.project_id}-postgres-prod"
+  database_version = "POSTGRES_15"
+  region           = var.region
+  deletion_protection = var.prod_deletion_protection
+
+  settings {
+    tier = var.prod_tier
+    
+    ip_configuration {
+      ipv4_enabled                                  = false  # Private IP only for prod
+      private_network                               = google_compute_network.vpc.id
+      enable_private_path_for_google_cloud_services = true
+    }
+    
+    backup_configuration {
+      enabled = true
+      start_time = "02:00"
+      point_in_time_recovery_enabled = true
+      backup_retention_settings {
+        retained_backups = 7
+        retention_unit   = "COUNT"
+      }
+    }
+    
+    database_flags {
+      name  = "log_statement"
+      value = "all"
+    }
+  }
+
+  depends_on = [google_service_networking_connection.private_vpc_connection]
 }
 
-# Create database user
-resource "google_sql_user" "app_user" {
+# Create databases for each environment
+resource "google_sql_database" "database_dev" {
+  count    = var.enable_dev_instance ? 1 : 0
+  name     = "rlp_database"
+  instance = google_sql_database_instance.postgres_dev[0].name
+}
+
+resource "google_sql_database" "database_prod" {
+  count    = var.enable_prod_instance ? 1 : 0
+  name     = "rlp_database"
+  instance = google_sql_database_instance.postgres_prod[0].name
+}
+
+# Create database users for each environment
+resource "google_sql_user" "app_user_dev" {
+  count    = var.enable_dev_instance ? 1 : 0
   name     = "rlp_user"
-  instance = google_sql_database_instance.postgres.name
+  instance = google_sql_database_instance.postgres_dev[0].name
+  password = var.db_password
+}
+
+resource "google_sql_user" "app_user_prod" {
+  count    = var.enable_prod_instance ? 1 : 0
+  name     = "rlp_user"
+  instance = google_sql_database_instance.postgres_prod[0].name
   password = var.db_password
 }
 
@@ -147,27 +198,40 @@ output "app_engine_url" {
   value = "https://${google_app_engine_application.app.default_hostname}"
 }
 
-output "database_connection_name" {
-  value = google_sql_database_instance.postgres.connection_name
-  description = "The connection name for the Cloud SQL instance"
+# Development database outputs
+output "database_dev_connection_name" {
+  value = var.enable_dev_instance ? google_sql_database_instance.postgres_dev[0].connection_name : null
+  description = "The connection name for the development Cloud SQL instance"
 }
 
-output "database_private_ip" {
-  value = google_sql_database_instance.postgres.private_ip_address
-  description = "The private IP address of the Cloud SQL instance"
+output "database_dev_public_ip" {
+  value = var.enable_dev_instance ? google_sql_database_instance.postgres_dev[0].public_ip_address : null
+  description = "The public IP address of the development Cloud SQL instance"
 }
 
-output "database_public_ip" {
-  value = var.enable_public_ip ? google_sql_database_instance.postgres.public_ip_address : null
-  description = "The public IP address of the Cloud SQL instance (if enabled)"
+output "database_dev_url" {
+  value = var.enable_dev_instance ? (
+    "postgresql://${google_sql_user.app_user_dev[0].name}:${var.db_password}@${google_sql_database_instance.postgres_dev[0].public_ip_address}:5432/${google_sql_database.database_dev[0].name}"
+  ) : null
+  description = "Database URL for development environment"
+  sensitive = true
 }
 
-output "database_url" {
-  value = var.enable_public_ip ? (
-    "postgresql://${google_sql_user.app_user.name}:${var.db_password}@${google_sql_database_instance.postgres.public_ip_address}:5432/${google_sql_database.database.name}"
-  ) : (
-    "postgresql://${google_sql_user.app_user.name}:${var.db_password}@${google_sql_database_instance.postgres.private_ip_address}:5432/${google_sql_database.database.name}"
-  )
-  description = "Database URL for the application"
+# Production database outputs
+output "database_prod_connection_name" {
+  value = var.enable_prod_instance ? google_sql_database_instance.postgres_prod[0].connection_name : null
+  description = "The connection name for the production Cloud SQL instance"
+}
+
+output "database_prod_private_ip" {
+  value = var.enable_prod_instance ? google_sql_database_instance.postgres_prod[0].private_ip_address : null
+  description = "The private IP address of the production Cloud SQL instance"
+}
+
+output "database_prod_url" {
+  value = var.enable_prod_instance ? (
+    "postgresql://${google_sql_user.app_user_prod[0].name}:${var.db_password}@${google_sql_database_instance.postgres_prod[0].private_ip_address}:5432/${google_sql_database.database_prod[0].name}"
+  ) : null
+  description = "Database URL for production environment"
   sensitive = true
 } 

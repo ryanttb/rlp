@@ -27,14 +27,47 @@ variable "environment" {
   default     = "dev"
 }
 
+# Development instance configuration
+variable "enable_dev_instance" {
+  description = "Enable development database instance"
+  type        = bool
+  default     = true
+}
+
+variable "dev_authorized_networks" {
+  description = "List of authorized networks for development Cloud SQL (CIDR notation)"
+  type        = list(string)
+  default     = ["0.0.0.0/0"]  # WARNING: This allows all IPs - restrict for production
+}
+
+# Production instance configuration
+variable "enable_prod_instance" {
+  description = "Enable production database instance"
+  type        = bool
+  default     = false
+}
+
+variable "prod_tier" {
+  description = "Machine type for production Cloud SQL instance"
+  type        = string
+  default     = "db-f1-micro"
+}
+
+variable "prod_deletion_protection" {
+  description = "Enable deletion protection for production database"
+  type        = bool
+  default     = true
+}
+
+# Legacy variables (deprecated - kept for backward compatibility)
 variable "enable_public_ip" {
-  description = "Enable public IP access for Cloud SQL (not recommended for production)"
+  description = "DEPRECATED: Use enable_dev_instance instead"
   type        = bool
   default     = true
 }
 
 variable "authorized_networks" {
-  description = "List of authorized networks for Cloud SQL (CIDR notation)"
+  description = "DEPRECATED: Use dev_authorized_networks instead"
   type        = list(string)
-  default     = ["0.0.0.0/0"]  # WARNING: This allows all IPs - restrict for production
+  default     = ["0.0.0.0/0"]
 } 
